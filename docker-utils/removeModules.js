@@ -4,7 +4,7 @@ const fs = require("fs");
 const fsPromises = fs.promises;
 
 const entry = "./src/index.ts";
-const out = "./src/index_concat.ts";
+const out = "./out/dist/index_concat.ts";
 
 const firstModules = [
   "./src/lib/contracts.ts",
@@ -37,7 +37,7 @@ const replaceImports = c => {
 
   const files = await findFiles("./src");
   let tsFiles = files.filter(file => file.endsWith(".ts") && file !== entry);
-
+  console.log(tsFiles);
   const outContent = [];
 
   for (const m of firstModules) {

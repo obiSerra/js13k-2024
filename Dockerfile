@@ -10,6 +10,8 @@ COPY ./docker-utils/ /workdir/
 
 RUN npm install
 
+RUN apt update && apt install -y zip unzip
+
 ENTRYPOINT ["npm"]
 
 CMD ["run", "serve"]

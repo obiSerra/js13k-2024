@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    // "explainFiles": true
+    "noUnusedLocals": true,
+    // "noUnusedParameters": true
+  }
+}

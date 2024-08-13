@@ -1,0 +1,7 @@
+dist/
+node_modules/
+*.zip
+test_size/
+index_concat.ts
+.vscode/
+submission/

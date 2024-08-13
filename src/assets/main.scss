@@ -1,5 +1,21 @@
+$background-color: #c6538c;
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: $background-color;
+}
+
 #stage {
-    margin-left: 100px;
-    background-color: grey;
+    width: 100%;
+    height: 100%;
+    background-color: $background-color;
     border: 1px solid black;
+}
+
+@media screen and (orientation:landscape) {
+    html {
+        transform: rotate(-90deg);
+    }
 }

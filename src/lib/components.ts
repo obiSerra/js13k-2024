@@ -264,3 +264,15 @@ export class ClickControlComponent implements IComponent {
         e.stage.canvas.addEventListener("click", this.clickListener);
     }
 }
+
+export class ResizeControlComponent implements IComponent {
+    type: ComponentType;
+    resizeListener: (e: Event) => void;
+    constructor(resizeListener: (e: Event) => void) {
+        this.type = "ctl";
+        this.resizeListener = resizeListener;
+    }
+    onInit(e: ComponentBaseEntity): void {
+        window.addEventListener("resize", this.resizeListener);
+    }
+}

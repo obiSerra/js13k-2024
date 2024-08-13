@@ -62,3 +62,6 @@ export class Expire {
 export const getProgress = x => {
   return Math.floor((x - 400) / 100);
 };
+
+export const overriteOnScreen = (content: string) => document.querySelector("#console").innerHTML = content;
+export const appendToConsole = (content: string) => document.querySelector("#console").innerHTML += content;

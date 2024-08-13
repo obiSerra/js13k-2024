@@ -31,18 +31,18 @@ export class TileMap extends ComponentBaseEntity {
     selectedImg: any;
     images: any;
 
-    constructor(gs: GameState) {
+    constructor(gs: GameState, size: IVec = [20, 20], tileSizes: IVec = [64, 64]) {
         const { stage } = gs;
         super(stage, []);
         this.gs = gs;
 
-        this.tileWidth = 64;
-        this.tileHeight = 64;
+        this.tileWidth = tileSizes[0];
+        this.tileHeight = tileSizes[1];
         const sz: IVec = [this.tileWidth, this.tileHeight];
         this.selectedImg = preRender(sz, tileBlock("red", null, sz));
 
-        this.width = 20;
-        this.height = 20;
+        this.width = size[0];
+        this.height = size[1];
 
         this.blocks = [];
 

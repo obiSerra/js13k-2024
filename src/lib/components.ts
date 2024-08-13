@@ -1,4 +1,4 @@
-import { IComponent, IVec, ComponentType, Sprite, IStage, CollisionSensors, ImgWithPosition } from "./contracts";
+import { IComponent, IVec, ComponentType, Sprite, IStage, ImgWithPosition } from "./contracts";
 import { ComponentBaseEntity } from "./entities";
 import { GameState } from "./gameState";
 import { pXs, sumVec } from "./utils";
@@ -22,7 +22,6 @@ export class PositionComponent implements IComponent {
     maxA = [10, 10];
     lp: IVec;
     maxSpeed: IVec;
-    collisionSensors: CollisionSensors = [null, null, null, null];
     direction: number;
     constructor(p: IVec, v: IVec = [0, 0], maxSpeed: IVec = [200, 200], direction = 1) {
         this.type = "pos";
@@ -41,9 +40,6 @@ export class PositionComponent implements IComponent {
         this.a[1] = dir[1] ? 0 : this.a[1];
     }
     onUpdate(e: ComponentBaseEntity, delta: number, gs?: GameState): void {
-        const collider = e.getComponent<BoxColliderComponent>("coll") ;
-        if (!collider) return;
-        const { solid } = collider;
 
         const maxSpeed = this.maxSpeed;
         let {
@@ -61,81 +57,15 @@ export class PositionComponent implements IComponent {
         vx = Math.abs(vx) > maxSpeed[0] ? maxSpeed[0] * Math.sign(vx) : vx;
         vy = Math.abs(vy) > maxSpeed[1] ? maxSpeed[1] * Math.sign(vy) : vy;
 
-        const [a, b, c, d] = this.collisionSensors;
-        const def = { d: null };
-        const [{ d: mxT }, { d: mxR }, { d: mxB }, { d: mxL }] = [a ?? def, b ?? def, c ?? def, d ?? def];
-
         let mvY = pXs(vy, delta);
         let mvX = pXs(vx, delta);
 
-        const lT = (n: null | number, b: number) => n !== null && Math.abs(b) > Math.abs(n);
-
-        if (solid) {
-            if (mvY > 0 && lT(mxB, mvY)) {
-                mvY = mxB * Math.sign(mvY);
-                vy = 0;
-            } else if (mvY < 0 && lT(mxT, mvY)) {
-                mvY = mxT * Math.sign(mvY);
-                vy = 0;
-            }
-
-            if (mvX > 0 && lT(mxR, mvX)) {
-                mvX = mxR * Math.sign(mvX);
-                vx = 0;
-            } else if (mvX < 0 && lT(mxL, mvX)) {
-                mvX = mxL * Math.sign(mvX);
-                vx = 0;
-            }
-        }
 
         this.a = [0, 0];
 
         this.v = [vx, vy];
         this.p = [x + mvX, y + mvY];
     }
-}
-
-export class BoxColliderComponent implements IComponent {
-    type: "coll";
-    box: IVec;
-    boxPos: IVec;
-    posModifiers: IVec = [0, 0];
-    trigger: boolean;
-    onCollide?: (e: ComponentBaseEntity, c: any) => void;
-    onCollideFn?: (e: ComponentBaseEntity, c: any) => void;
-    isColliding: boolean;
-    collisions: { e: ComponentBaseEntity; c: CollisionSensors }[] = [];
-    solid: boolean = true;
-
-    constructor(box: IVec, onCollide?: (e: ComponentBaseEntity, b: CollisionSensors) => void) {
-        this.type = "coll";
-        this.box = box;
-        this.trigger = true;
-        this.onCollideFn = onCollide;
-        this.isColliding = false;
-    }
-    onInit(e: ComponentBaseEntity): void {
-        this.onCollide = this.onCollideFn?.bind(e) || null;
-        this.boxPos = e.getComponent<PositionComponent>("pos").p;
-    }
-
-    onUpdate(e: ComponentBaseEntity, delta: number, gs?: GameState): void {
-        const [x, y] = e.getComponent<PositionComponent>("pos").p;
-        this.boxPos = [x + this.posModifiers[0], y + this.posModifiers[1]];
-    }
-
-    // TODO Debug code, remove before release
-    // onRender(e: ComponentBaseEntity, delta: number, c: IVec): void {
-    //   const [w, h] = this.box;
-
-    //   const [x, y] = this.boxPos;
-    //   const ctx = e.stage.ctx;
-    //   ctx.beginPath();
-    //   ctx.rect(x + c[0], y + c[1], w, h);
-    //   ctx.strokeStyle = "lime";
-    //   ctx.stroke();
-    //   ctx.closePath();
-    // }
 }
 
 export class SpriteRenderComponent implements IComponent {
@@ -237,27 +167,6 @@ export class CompositImgRenderComponent implements IComponent {
             this.stage.ctx.drawImage(i[0], pos[0] + i[1][0], pos[1] + i[1][1]);
         });
 
-    }
-}
-
-export class GravityComponent implements IComponent {
-    type: ComponentType;
-    gravity: number;
-    ev: number;
-    active: true;
-    constructor(gravity: number = 1, ev: number = null) {
-        this.type = "grv";
-        this.gravity = gravity * 9.8;
-        this.ev = !!ev ? ev : gravity * 100;
-    }
-    onUpdate(e: ComponentBaseEntity, delta: number): void {
-        const pos = e.getComponent<PositionComponent>("pos");
-
-        pos.accelerate([0, this.gravity]);
-        // const accV = Math.max(v[1] + mXs(this.gravity, delta), th  is.ev);
-
-        // const accV = v[1] + pXs(this.gravity, delta);
-        // (e.getComponent<PositionComponent).v = [v[0], accV]>("pos")
     }
 }
 

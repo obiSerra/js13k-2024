@@ -4,7 +4,7 @@ const fs = require("fs");
 const fsPromises = fs.promises;
 
 const entry = "./src/index.ts";
-const out = "./out/dist/index_concat.ts";
+const out = "./out/index_concat.ts";
 
 const firstModules = [
   "./src/lib/contracts.ts",

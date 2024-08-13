@@ -7,6 +7,7 @@ COPY package.json /workdir
 COPY src /workdir/src
 
 COPY ./docker-utils/ /workdir/
+COPY tsconfig.json /workdir/tsconfig.json
 
 RUN npm install
 

@@ -39,15 +39,6 @@ export type ImagePxsRawMap = { [key: string]: ImagePxsRaw } | ColorMap;
 
 export type ImagePxs = (string | null)[][];
 
-export type CollisionSensor = { d: number; t: any };
-
-export type CollisionSensors = [
-    CollisionSensor | null,
-    CollisionSensor | null,
-    CollisionSensor | null,
-    CollisionSensor | null
-];
-
 export type ImgFnMap = { [key: string]: { d: IVec; f: RenderFn } };
 
 export type ImgWithPosition = [HTMLImageElement, [number, number]];

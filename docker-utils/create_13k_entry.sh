@@ -5,17 +5,19 @@
 rm -f out/submission.zip
 
 # Remove current build dir
-rm -rf out/dist/*
+rm -rf out/dist
+
+rm -rf out/submission
 
 
 node removeModules.js
 
-chmod 777 out/dist/index_concat.ts
+chmod 777 out/index_concat.ts
 # prettier dist/index_concat.ts --write --config .prettierrc
-echo "Manually fix the file out/dist/index_concat.ts [enter to continue]?"
+echo "Manually fix the file out/index_concat.ts [enter to continue]?"
 read varname
 cp src/index.ts src/index.ts.bak
-cp out/dist/index_concat.ts src/index.ts
+cp out/index_concat.ts src/index.ts
 
 chown $USER_ID:$GROUP_ID src/index.ts
 
@@ -27,7 +29,7 @@ npm run dist
 # Remove temporary files
 mv src/index.ts.bak src/index.ts
 rm -f index.ts.bak
-rm -f index_concat.ts
+rm -f out/index_concat.ts
 
 # Create submission dir
 cp -r out/dist/ out/submission/
@@ -37,8 +39,10 @@ cp -r out/dist/ out/submission/
 #...
 
 # Create the zip and remove the submission dir
-zip -r out/submission.zip out/submission/
+zip -rj out/submission.zip out/submission/
 rm -rf out/submission/
+chown $USER_ID:$GROUP_ID out/submission.zip
+
 
 echo ""
 echo "Submission size:"

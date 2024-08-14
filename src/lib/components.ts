@@ -1,3 +1,4 @@
+import { TileMap } from "../game/map";
 import { IComponent, IVec, ComponentType, Sprite, IStage, ImgWithPosition } from "./contracts";
 import { ComponentBaseEntity } from "./entities";
 import { GameState } from "./gameState";
@@ -65,6 +66,32 @@ export class PositionComponent implements IComponent {
 
         this.v = [vx, vy];
         this.p = [x + mvX, y + mvY];
+    }
+}
+
+export class TiledPositionComponent implements IComponent {
+    type: "pos";
+    tile: number;
+    direction: number;
+    map: TileMap;
+    size: IVec;
+    p: IVec;
+    center: IVec;
+
+    constructor(tile: number, size: IVec, map: TileMap, direction = 1) {
+        this.type = "pos";
+        this.tile = tile;
+        this.direction = direction;
+        this.map = map;
+        this.size = size;
+        this.center = [-size[0] / 2, -size[1] / 2];
+    }
+
+    onUpdate(e: ComponentBaseEntity, delta: number, gs?: GameState): void {
+        if (!this.tile !== undefined) {
+            const block = this.map.blockCenter(this.tile);
+            this.p = [block[0] + this.center[0], block[1] + this.center[1]];
+        }
     }
 }
 
@@ -140,7 +167,10 @@ export class ImgRenderComponent implements IComponent {
 
     onRender(e: ComponentBaseEntity, delta: number, c: IVec): void {
         const pos = e.getComponent<PositionComponent>("pos").p;
-        this.stage.ctx.drawImage(this.image, pos[0] + c[0], pos[1] + c[1]);
+        if (pos) {
+            this.stage.ctx.drawImage(this.image, pos[0] + c[0], pos[1] + c[1]);
+        }
+
     }
 }
 
@@ -275,4 +305,34 @@ export class ResizeControlComponent implements IComponent {
     onInit(e: ComponentBaseEntity): void {
         window.addEventListener("resize", this.resizeListener);
     }
+}
+
+// TODO - check utils classes
+export class CountDownComponent implements IComponent {
+    type: ComponentType;
+    time: number;
+    totTime: number;
+    running: boolean = false;
+    onEnd: () => void;
+    constructor(time: number, startingAt: number = time, running: boolean = false,  onEnd?: () => void) {
+        this.type = "ctd";
+        this.time = startingAt;
+        this.totTime = time;
+        this.onEnd = onEnd ?? (() => { });
+        this.running = running;
+    }
+    onUpdate(e: ComponentBaseEntity, delta: number): void {
+        
+        if (!this.running) return;
+        this.time -= delta;
+        if (this.time < 0) {
+            console.log("Countdown ended");
+            this.time = 0;
+            this.onEnd();
+        }
+    }
+    reset() {
+        this.time = this.totTime;
+    }
+
 }

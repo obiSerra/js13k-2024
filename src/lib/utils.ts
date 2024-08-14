@@ -12,7 +12,7 @@ export const isInView = (e: ComponentBaseEntity, c: IVec, canvas: HTMLCanvasElem
   const p = e.getComponent<PositionComponent>("pos")?.p;
   if (!p) return true;
   const iP = [p[0] + cx, p[1] + cy];
-  const border = 200;
+  const border = 400;
   const { width, height } = canvas;
   if (iP[0] < -border || iP[0] > width + border || iP[1] < -border || iP[1] > height + border) return false;
   return true;
@@ -65,3 +65,5 @@ export const getProgress = x => {
 
 export const overriteOnScreen = (content: string) => document.querySelector("#console").innerHTML = content;
 export const appendToConsole = (content: string) => document.querySelector("#console").innerHTML += content;
+
+export const nullOrUndefined = (x: any) => x === null || x === undefined;

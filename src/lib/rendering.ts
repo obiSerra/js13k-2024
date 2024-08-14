@@ -8,6 +8,14 @@ export const preRender = (dim: IVec, renderFn: RenderFn) => {
   prC.height = h;
   const ctx = prC.getContext("2d");
   renderFn(ctx, [prC.width / 2, prC.height / 2]);
+  // Debugging prerender images
+  ctx.beginPath();
+  ctx.rect(0, 0, w, h);
+  // ctx.strokeStyle = "lime";
+
+  ctx.closePath();
+  ctx.stroke();
+
   const imgSrc = prC.toDataURL("image/png");
   const img = document.createElement("img");
   img.src = imgSrc;

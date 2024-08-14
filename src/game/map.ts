@@ -1,4 +1,4 @@
-import { CompositImgRenderComponent, PositionComponent } from "../lib/components";
+import { CompositImgRenderComponent, StaticPositionComponent } from "../lib/components";
 import { IVec, RenderFn } from "../lib/contracts";
 import { ComponentBaseEntity } from "../lib/entities";
 import { GameState } from "../lib/gameState";
@@ -18,6 +18,9 @@ const tileBlock: (color: string, stroke?: string | null, size?: IVec) => RenderF
             if (stroke) ctx.stroke();
         };
 
+
+// TODO - pregenearte the whole map
+// TODO - generate selected with overlay
 export class TileMap extends ComponentBaseEntity {
     gs: GameState;
 
@@ -27,7 +30,7 @@ export class TileMap extends ComponentBaseEntity {
     tileWidth: number;
     tileHeight: number;
 
-    blocks: any;
+    tiles: any;
     selectedImg: any;
     images: any;
 
@@ -35,6 +38,7 @@ export class TileMap extends ComponentBaseEntity {
         const { stage } = gs;
         super(stage, []);
         this.gs = gs;
+        this.ID = "map";
 
         this.tileWidth = tileSizes[0];
         this.tileHeight = tileSizes[1];
@@ -44,29 +48,60 @@ export class TileMap extends ComponentBaseEntity {
         this.width = size[0];
         this.height = size[1];
 
-        this.blocks = [];
+        this.tiles = [];
 
-        this.images = [preRender(sz, tileBlock("white", null, sz)), preRender(sz, tileBlock("black", null, sz))];
+        this.images = [
+            preRender(sz, tileBlock("white", "gray", sz)),
+            preRender(sz, tileBlock("white", "gray", sz))
+        ];
 
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                this.blocks.push({
-                    img: [this.images[(y + x) % 2], [y * this.tileWidth, x * this.tileHeight]],
+                this.tiles.push({
+                    img: [this.images[(y + x) % 2], [x * this.tileWidth, y * this.tileHeight]],
                     selected: false
                 });
             }
         }
 
-        const renderer = new CompositImgRenderComponent(this.blocks.map((b: any) => b.img));
+        const renderer = new CompositImgRenderComponent(this.tiles.map((b: any) => b.img));
 
         this.addComponent(renderer);
-        this.addComponent(new PositionComponent([0, 0]));
+        this.addComponent(new StaticPositionComponent([0, 0]));
+    }
+    selectedBlocks() {
+        for (let i = 0; i < this.tiles.length; i++) {
+            if (this.tiles[i].selected) return i;
+        }
+        return null;
+    }
+    findBlock(x: number, y: number) {
+        const blockX = Math.floor(x / this.tileWidth);
+        const blockY = Math.floor(y / this.tileHeight);
+        return blockX + blockY * this.width;
     }
 
-    _findBlock(x: number, y: number) {
-        const blockX = Math.floor(y / this.tileWidth);
-        const blockY = Math.floor(x / this.tileHeight);
-        return blockX + blockY * this.width;
+    clearSelection() {
+        this.tiles = this.tiles.map((b: any, i: number) => {
+            if (b.selected) {
+                b.selected = false;
+            }
+            return b
+        })
+        // TODO - Optimize render updates
+        const renderer = new CompositImgRenderComponent(this.tiles.map((b: any) => b.selected ? [this.selectedImg, b.img[1]] : b.img));
+        this.replaceComponent(renderer);
+    }
+
+    blockPos(block: number) {
+        const x = block % this.width;
+        const y = Math.floor(block / this.width);
+        return [x * this.tileWidth, y * this.tileHeight];
+    }
+
+    blockCenter(block: number) {
+        const [x, y] = this.blockPos(block);
+        return [x + this.tileWidth / 2, y + this.tileHeight / 2];
     }
 
     onUpdateStart(d: number, gs: GameState): void {
@@ -74,19 +109,11 @@ export class TileMap extends ComponentBaseEntity {
             clicked = contoller?.clickPosition;
         if (clicked) {
             const [x, y] = clicked;
-            const block = this._findBlock(x, y);
-
-
-            this.blocks.map((b: any, i: number) => {
-                if (b.selected) {
-                    b.selected = false;
-                }
-                return b
-            })
-
-            this.blocks[block].selected = !this.blocks[block].selected;
+            const block = this.findBlock(x, y);
+            this.clearSelection()
+            this.tiles[block].selected = !this.tiles[block].selected;
             contoller.clickPosition = null;
-            const renderer = new CompositImgRenderComponent(this.blocks.map((b: any) =>b.selected ? [this.selectedImg, b.img[1]] : b.img));
+            const renderer = new CompositImgRenderComponent(this.tiles.map((b: any) => b.selected ? [this.selectedImg, b.img[1]] : b.img));
             this.replaceComponent(renderer);
 
         }

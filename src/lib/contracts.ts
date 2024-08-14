@@ -3,7 +3,7 @@ import { GameState } from "./gameState";
 
 export type IVec = [number, number];
 
-export type ComponentType = "pos" | "ctl" | "coll" | "rnd" | "grv" | "snd" | "menu" | "html";
+export type ComponentType = "pos" | "ctl" | "coll" | "rnd" | "grv" | "snd" | "menu" | "html" | "behv" | "ctd";
 
 export interface IComponent {
     type: ComponentType;

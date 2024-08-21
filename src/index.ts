@@ -1,7 +1,7 @@
 import "./assets/main.scss";
 import { TileMap } from "./game/map";
 import { ClickControlComponent, CountDownComponent, ImgRenderComponent, ResizeControlComponent, TiledPositionComponent } from "./lib/components";
-import { ComponentType, IComponent, IRenderComponent, IVec, RenderFn } from "./lib/contracts";
+import { IComponent, IRenderComponent, IVec, RenderFn } from "./lib/contracts";
 import { ComponentBaseEntity } from "./lib/entities";
 import { GameState, Scene } from "./lib/gameState";
 import { preRender } from "./lib/rendering";
@@ -186,7 +186,6 @@ const planTrip = (start: number, end: number, map: TileMap) => {
             const [nx, ny] = neighbors[i];
             // TODO - Bug when changing to target while navigating
             const neighbor = nodes[nx][ny];
-            neighbor.sort((a, b) => a.cost - b.cost);
             if (neighbor.cost === currentNode.cost - 1) {
                 return reversePath(neighbor, path, nodes);
             }
@@ -197,7 +196,7 @@ const planTrip = (start: number, end: number, map: TileMap) => {
 }
 
 class MovementComponent implements IComponent {
-    type: ComponentType;
+    type: string;
 
     currentTile: number | null = null;
     path: number[] = [];
@@ -213,8 +212,7 @@ class MovementComponent implements IComponent {
 
     planPath(selected, map) {
         let path = planTrip(this.currentTile, selected, map)?.reverse()
-        if (path === undefined) debugger;
-        console.log("Path", path,this.currentTile, selected);
+        if (path === undefined) return;
         path = [...new Set(path)];
         
         path.shift();
@@ -222,10 +220,10 @@ class MovementComponent implements IComponent {
     }
 
     onUpdate(e: ComponentBaseEntity, delta: number, gs?: GameState): void {
-        if (!this.entity) return;
-        const tile = this.entity.getComponent<TiledPositionComponent>("pos").tile;
+        const tile = e.getComponent<TiledPositionComponent>("pos").tile;
+        const player = e as Player;
         if (nullOrUndefined(tile)) return;
-
+        if (player.getPath().length === 0) player.action = "idle";
         this.currentTile = tile;
         const map = gs.scene.getEntity("map") as TileMap | null;
         if (!map) return;
@@ -237,16 +235,17 @@ class MovementComponent implements IComponent {
             return;
         };
 
+        const action = (this.entity as Player).action;
         if (!nullOrUndefined(selected) && (this.path.length === 0 || this.path[this.path.length - 1] !== selected)) {
             this.planPath(selected, map);
-        } else if(this.path.length > 0) {
+        } else if(this.path.length > 0 && action === "moving") {
             const countDown = this.entity.getComponent<CountDownComponent>("ctd");
             if (countDown && !countDown.running) {
                 countDown.running = true;
             }
             if (countDown && countDown.time <= 0) {
                 const next = this.path.shift();
-                console.log("Moving to", next);
+                // console.log("Moving to", next);
                 this.entity.getComponent<TiledPositionComponent>("pos").tile = next;
                 countDown.reset()
             }
@@ -268,15 +267,20 @@ class MovementComponent implements IComponent {
 
 class Player extends ComponentBaseEntity {
     gs: GameState;
-    path: number[] = [];
+    action: string = "idle";
     constructor(gs: GameState, pos: number, map: TileMap) {
         const { stage } = gs;
         super(stage, []);
         this.gs = gs;
+        this.ID = "player";
         this.addComponent(new TiledPositionComponent(pos, [20, 20], map));
         this.addComponent(new ImgRenderComponent(preRender([20, 20], renderPlayer)));
         this.addComponent(new MovementComponent());
-        this.addComponent(new CountDownComponent(1000, 0));
+        this.addComponent(new CountDownComponent(200, 0));
+    }
+
+    getPath() {
+        return this.getComponent<MovementComponent>("behv").path;
     }
 }
 
@@ -292,5 +296,5 @@ class Player extends ComponentBaseEntity {
 
     gs.addEntity(new ResizeController(gs));
     await gs.runScene();
-    console.log("Game Over");
+    // console.log("Game Over");
 })();

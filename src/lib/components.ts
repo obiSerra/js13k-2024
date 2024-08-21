@@ -1,11 +1,11 @@
 import { TileMap } from "../game/map";
-import { IComponent, IVec, ComponentType, Sprite, IStage, ImgWithPosition } from "./contracts";
+import { IComponent, IVec, Sprite, IStage, ImgWithPosition } from "./contracts";
 import { ComponentBaseEntity } from "./entities";
 import { GameState } from "./gameState";
 import { pXs, sumVec } from "./utils";
 
 export class StaticPositionComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     p: IVec;
     direction: number;
     constructor(p: IVec, v: IVec = [0, 0]) {
@@ -96,7 +96,7 @@ export class TiledPositionComponent implements IComponent {
 }
 
 export class SpriteRenderComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     sprite: Sprite;
 
     imgPos: IVec = [0, 0];
@@ -149,7 +149,7 @@ export class SpriteRenderComponent implements IComponent {
 }
 
 export class ImgRenderComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     stage: IStage;
     image: HTMLImageElement;
     renderPriority: number;
@@ -175,15 +175,15 @@ export class ImgRenderComponent implements IComponent {
 }
 
 export class CompositImgRenderComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     stage: IStage;
     images: ImgWithPosition[];
     renderPriority: number;
 
     pos: IVec;
 
-    constructor(images: ImgWithPosition[], renderPriority: number = 99) {
-        this.type = "rnd";
+    constructor(images: ImgWithPosition[], renderPriority: number = 99, type: string = "rnd") {
+        this.type = type;
         this.images = images;
         this.renderPriority = renderPriority;
     }
@@ -201,7 +201,7 @@ export class CompositImgRenderComponent implements IComponent {
 }
 
 export class MenuComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     selector: string;
 
     el: HTMLElement;
@@ -238,7 +238,7 @@ export class MenuComponent implements IComponent {
 }
 
 export class HTMLComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     selector: string;
     el: HTMLElement;
 
@@ -261,7 +261,7 @@ export class HTMLComponent implements IComponent {
 type EvtListeners = { [k: string]: (e: KeyboardEvent) => void };
 
 export class KeyboardControlComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     downListener: EvtListeners;
     upListener: EvtListeners;
     constructor(downEvtLst: EvtListeners = {}, upEvtLst: EvtListeners = {}) {
@@ -284,7 +284,7 @@ export class KeyboardControlComponent implements IComponent {
 }
 
 export class ClickControlComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     clickListener: (e: MouseEvent) => void;
     constructor(clickListener: (e: MouseEvent) => void) {
         this.type = "ctl";
@@ -296,7 +296,7 @@ export class ClickControlComponent implements IComponent {
 }
 
 export class ResizeControlComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     resizeListener: (e: Event) => void;
     constructor(resizeListener: (e: Event) => void) {
         this.type = "ctl";
@@ -309,7 +309,7 @@ export class ResizeControlComponent implements IComponent {
 
 // TODO - check utils classes
 export class CountDownComponent implements IComponent {
-    type: ComponentType;
+    type: string;
     time: number;
     totTime: number;
     running: boolean = false;
@@ -326,7 +326,7 @@ export class CountDownComponent implements IComponent {
         if (!this.running) return;
         this.time -= delta;
         if (this.time < 0) {
-            console.log("Countdown ended");
+            // console.log("Countdown ended");
             this.time = 0;
             this.onEnd();
         }

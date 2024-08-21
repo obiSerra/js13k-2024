@@ -3,10 +3,8 @@ import { GameState } from "./gameState";
 
 export type IVec = [number, number];
 
-export type ComponentType = "pos" | "ctl" | "coll" | "rnd" | "grv" | "snd" | "menu" | "html" | "behv" | "ctd";
-
 export interface IComponent {
-    type: ComponentType;
+    type: string;
     onInit?(e: ComponentBaseEntity): void;
     onRender?(e: ComponentBaseEntity, delta: number, c: IVec): void;
     onUpdate?(e: ComponentBaseEntity, delta: number, gs?: GameState): void;
